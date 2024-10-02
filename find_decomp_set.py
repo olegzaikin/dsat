@@ -13,7 +13,7 @@ import copy
 import time
 
 script = "find_decomp_set.py"
-version = "0.0.1"
+version = "0.0.2"
 
 timelimit_sec = 5000
 
@@ -91,6 +91,7 @@ def process_decomp_set(base_cnf_name : str, decomposition_set : list, \
 		print(sample[i])
 	# For each element from the sample, make and solver a CNF:
 	sum_runtime = 0
+	is_break = False
 	for bin_seq in sample:
 		assert(len(decomposition_set) >= len(bin_seq))
 		one_lit_clauses = []
@@ -110,10 +111,13 @@ def process_decomp_set(base_cnf_name : str, decomposition_set : list, \
 		res = parse_solver_log(cdcl_log)
 		if res == 'INDET':
 			print('Too hard instance, res=INDET, runtime=' + str(runtime))
+			is_break = True
 			break
 		#print(res + ' ' + str(runtime) + ' sec')
 		sum_runtime += runtime
 	avg_runtime = sum_runtime / len(sample)
+	if is_break:
+		avg_runtime = -1
 	return avg_runtime
 
 print(script + ' of version ' + version + ' is running')
@@ -175,7 +179,8 @@ for i in range(32):
 	dec_set_size = len(dec_set)
 	avg_runtime = process_decomp_set(cnf_name, dec_set, solver, i)
 	print('avg_runtime  : ' + str(avg_runtime))
-	assert(avg_runtime > 0)
+	if avg_runtime < 0:
+		break
 	estim = avg_runtime * pow(2, dec_set_size)
 	print('dec_set size : ' + str(dec_set_size))
 	print('estim        : ' + str(estim) + ' sec')

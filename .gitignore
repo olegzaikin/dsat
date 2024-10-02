@@ -1,0 +1,4 @@
+*.cnf
+log_*
+out_*
+decomp_set*

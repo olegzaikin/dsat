@@ -1,4 +1,7 @@
 *.cnf
+*.icnf
 log_*
 out_*
 decomp_set*
+solve_decomp_set
+*.o

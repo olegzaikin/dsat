@@ -4,6 +4,7 @@
 #
 # For a given CNF and an initial decomposition set, find the best decomposition
 # set in D-SAT style, like it was published in Oleg Zaikin's PhD thesis.
+# Additionlally, a family of bitM-like CNFs are suggested.
 #==============================================================================
 
 import sys
@@ -12,10 +13,8 @@ import os
 import copy
 import time
 
-script = "find_decomp_set.py"
-version = "0.0.2"
-
-timelimit_sec = 5000
+script = "find_decomp_set_bitM.py"
+version = "0.0.3"
 
 def write_clauses_cnf(cnf_name : str, var_num : int, \
 					  main_cnf_clauses : list, one_lit_clauses : list):
@@ -39,7 +38,7 @@ def parse_solver_log(log):
 	return res
 
 def process_decomp_set(base_cnf_name : str, decomposition_set : list, \
-					   solver : str, iter_num : int):
+					   solver : str, timelimit_sec : int, iter_num : int):
 	assert(iter_num >= 0 and iter_num <= 32)
 	s = base_cnf_name.split('bitM.cnf')[0]
 	ind = s.rfind('_')
@@ -124,12 +123,13 @@ print(script + ' of version ' + version + ' is running')
 if len(sys.argv) == 2 and sys.argv[1] == '-v':
 	exit(1)
 
-if len(sys.argv) < 4:
-	print('Usage : ' + script + ' cnf decomposition-set solver [sample-size]')
+if len(sys.argv) < 6:
+	print('Usage : ' + script + ' cnf decomposition-set solver sample-size solver-timelimit')
 	print('  cnf               : a file in DIMACS format.')
 	print('  decomposition-set : a file with an initial decomposition set')
 	print('  solver            : a complete SAT solver')
 	print('  sample-size       : size of a random sample')
+	print('  solver-timelimit  : solver time limit in seconds')
 	exit(1)
 
 cnf_name = sys.argv[1]
@@ -137,13 +137,14 @@ assert('0bitM' in cnf_name)
 decomposition_set_fname = sys.argv[2]
 solver = sys.argv[3]
 sample_size = 1000
-if len(sys.argv) > 4:
-	sample_size = int(sys.argv[4])
+sample_size = int(sys.argv[4])
+timelimit_sec = int(sys.argv[5])
 assert(sample_size >= 3)
 print('cnf_name                : ' + cnf_name)
 print('decomposition_set_fname : ' + decomposition_set_fname)
 print('solver                  : ' + solver)
 print('sample_size             : ' + str(sample_size))
+print('timelimit_sec           : ' + str(timelimit_sec))
 
 decomposition_set = []
 with open(decomposition_set_fname, 'r') as f:
@@ -166,18 +167,16 @@ with open(decomposition_set_fname, 'r') as f:
 			decomposition_set.append(int(w))
 assert(len(decomposition_set) == 32)
 
-print('decomposition_set :')
-print(decomposition_set)
-
 random.seed(0)
 
 best_estim = -1
 best_dec_set = -1
 dec_set = copy.deepcopy(decomposition_set)
 for i in range(32):
+	print('Decomposition_set in iteraion ' + str(i) + ' :')
 	print(dec_set)
 	dec_set_size = len(dec_set)
-	avg_runtime = process_decomp_set(cnf_name, dec_set, solver, i)
+	avg_runtime = process_decomp_set(cnf_name, dec_set, solver, timelimit_sec, i)
 	print('avg_runtime  : ' + str(avg_runtime))
 	if avg_runtime < 0:
 		break

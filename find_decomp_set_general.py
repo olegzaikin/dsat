@@ -13,7 +13,7 @@ import copy
 import time
 
 script = "find_decomp_set_general.py"
-version = "0.0.1"
+version = "0.0.2"
 
 timelimit_sec = 600
 
@@ -148,7 +148,6 @@ with open(decomposition_set_fname, 'r') as f:
 		for w in words:
 			assert(int(w) > 0)
 			decomposition_set.append(int(w))
-assert(len(decomposition_set) == 32)
 
 print('decomposition_set :')
 print(decomposition_set)
